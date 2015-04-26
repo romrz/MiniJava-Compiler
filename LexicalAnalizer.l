@@ -11,7 +11,12 @@ ID [a-zA-Z_][a-zA-Z0-9_]*
 HexDigit [0-9A-Za-z]
 String "\""(("\\"x{HexDigit}{2})|("\\"u{HexDigit}{4})|("\\"[^xu])|("\\\"")|([^"\"""\\""\n"]))*"\""
 Operator "+"|"-"|"*"|"."|"!"|"="|"&&"|"<"|","
-GroupingCharacter "("|")"|"{"|"}"|"["|"]"
+OpenParenthesis "("
+CloseParenthesis ")"
+OpenBrake "["
+CloseBrake "]"
+OpenBrace "{"
+CloseBrace "}"
 
 BooleanConstant "true"|"false"
 Number [0-9]+
@@ -33,7 +38,13 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 {String}              { printf("%d: String: %s\n", yylineno, yytext); }
 {ReservedWord}        { printf("%d: ReservedWord: %s\n", yylineno, yytext); }
 {Operator}            { printf("%d: Operator: %s\n", yylineno, yytext); }
-{GroupingCharacter}   { printf("%d: %s\n", yylineno, yytext); }
+
+{OpenParenthesis}     { printf("%d: OpenParenthesis %s\n", yylineno, yytext); }
+{CloseParenthesis}    { printf("%d: CloseParenthesis %s\n", yylineno, yytext); }  
+{OpenBrake}           { printf("%d: OpenBrake %s\n", yylineno, yytext); }
+{CloseBrake}          { printf("%d: CloseBrake %s\n", yylineno, yytext); }
+{OpenBrace}           { printf("%d: OpenBrace %s\n", yylineno, yytext); }
+{CloseBrace}          { printf("%d: CloseBrace %s\n", yylineno, yytext); }
 
 {BooleanConstant}     { printf("%d: BooleanConstant: %s\n", yylineno, yytext); }
 {Number}              { errno = 0;
