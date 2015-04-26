@@ -8,6 +8,8 @@
 
 ReservedWord "class"|"public"|"static"|"void"|"int"|"boolean"|"extends"|"if"|"else"|"while"|"this"|"return"|"System.out.println"|"new"|"String"
 ID [a-zA-Z_][a-zA-Z0-9_]*
+HexDigit [0-9A-Za-z]
+String "\""(("\\"x{HexDigit}{2})|("\\"u{HexDigit}{4})|("\\"[^xu])|("\\\"")|([^"\"""\\""\n"]))*"\""
 Operator "+"|"-"|"*"|"."|"!"|"="|"&&"|"<"|","
 GroupingCharacter "("|")"|"{"|"}"|"["|"]"
 
@@ -28,7 +30,7 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 %option yylineno
 
 %%
-
+{String}              { printf("%d: String: %s\n", yylineno, yytext); }
 {ReservedWord}        { printf("%d: ReservedWord: %s\n", yylineno, yytext); }
 {Operator}            { printf("%d: Operator: %s\n", yylineno, yytext); }
 {GroupingCharacter}   { printf("%d: %s\n", yylineno, yytext); }
