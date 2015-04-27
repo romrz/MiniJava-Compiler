@@ -1,0 +1,8 @@
+
+lex.yy.c
+
+# Ignore the executable files
+*.out
+
+# Ignore the java files used for testing 
+*.java
