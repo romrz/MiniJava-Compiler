@@ -1,8 +1,11 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include "SymbolTable.h"
 
 #define ID_MAX_LEN 16
+
+SymbolTable table;
 
 %}
 
@@ -56,8 +59,20 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 
 {ID}                  { if(yyleng > ID_MAX_LEN)
                           fprintf(stderr,"ERROR: (Line %d) ID max length: %s\n", yylineno, yytext);
-                        else
-                          printf("%d: ID: %s\n", yylineno, yytext); }
+                        else {
+			  printf("%d: ID: %s\n", yylineno, yytext);
+
+			  string id(yytext);
+
+			  // Si no esta el id en la tabla inserta toda la informacion nueva
+			  // si ya existe el id solo añade el nuevo numero de linea
+			  if(table.find(id) == table.end())
+			    table.insert( {id, TableInfo{id, INT, 0, vector<int>({yylineno})}} );
+			  else
+			    table[id].lines.push_back(yylineno);
+
+			}
+		      }
 
 {InstructionEnd}      { printf("%d: %s\n", yylineno, yytext); }
 
@@ -72,6 +87,11 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 
 %%
 
-int main(){
-  return yylex();
+int main()
+{
+  yylex();
+
+  cout << table;
+  
+  return 0;
 }
