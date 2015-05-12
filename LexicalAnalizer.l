@@ -67,7 +67,7 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 			  // Si no esta el id en la tabla inserta toda la informacion nueva
 			  // si ya existe el id solo añade el nuevo numero de linea
 			  if(table.find(id) == table.end())
-			    table.insert( {id, TableInfo{id, INT, 0, vector<int>({yylineno})}} );
+			    table.insert( {id, TableInfo{INT, 0, vector<int>({yylineno})}} );
 			  else
 			    table[id].lines.push_back(yylineno);
 

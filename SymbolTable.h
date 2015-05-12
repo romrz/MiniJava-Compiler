@@ -7,32 +7,30 @@ using namespace std;
 
 enum Type { INT, BOOL };
 
-typedef struct {
-
-  string id;
+struct TableInfo {
   Type type;
   int value;
   vector<int> lines;
-  
-} TableInfo;
+};
 
 typedef unordered_map<string, TableInfo> SymbolTable;
 
-
 ostream& operator<<(ostream &os, SymbolTable& table)
 {
-  os << endl << "Symbol Table" << endl << endl;
+  // Obtiene la funcion hash
+  SymbolTable::hasher fn = table.hash_function();
   
-  for(auto it = table.begin(); it != table.end(); it++)
+  os << endl << "Symbol Table" << endl << endl;
+  for(auto& i : table)
   {
-    os << it->first << ": "<< "{ "
-	 << it->second.id<< ", "
-	 << it->second.type << ", "
-	 << it->second.value << ", ";
+    os << i.first << ": "<< "{ " << i.second.type << ", " << i.second.value << ", ";
 
-    for(int line : it->second.lines)
+    for(int line : i.second.lines)
       os << line << " ";
 
-    os << "}" << endl;
+    os << "}";
+
+    // Imprime el valor de la funcion hash
+    os << " " << fn(i.first) << endl;    
   }
 }
