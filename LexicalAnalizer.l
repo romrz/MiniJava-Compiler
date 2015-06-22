@@ -1,30 +1,30 @@
 %{
 #include <cstdio>
 #include <cstdlib>
+
+void yyerror(char *s);
+#include "y.tab.h"
 #include "SymbolTable.h"
 
 #define ID_MAX_LEN 16
 
 SymbolTable table;
-
 %}
 
-ReservedWord "class"|"public"|"static"|"void"|"int"|"boolean"|"extends"|"if"|"else"|"while"|"this"|"return"|"System.out.println"|"new"|"String"
 ID [a-zA-Z_][a-zA-Z0-9_]*
 HexDigit [0-9A-Za-z]
 String "\""(("\\"x{HexDigit}{2})|("\\"u{HexDigit}{4})|("\\"[^xu])|("\\\"")|([^"\"""\\""\n"]))*"\""
-Operator "+"|"-"|"*"|"."|"!"|"="|"&&"|"<"|","
+Operator "+"|"-"|"*"|"."|"!"|"="|"<"|","
 OpenParenthesis "("
 CloseParenthesis ")"
 OpenBrake "["
 CloseBrake "]"
 OpenBrace "{"
 CloseBrace "}"
+InstructionEnd ";"
 
-BooleanConstant "true"|"false"
 Number [0-9]+
 
-InstructionEnd ";"
 Blank " "|"\t"|"\n"
 
 Comment ("//".*)|("/*"([^'*']|("*"+([^"*""/"])))*"*"+"/")
@@ -38,47 +38,67 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 %option yylineno
 
 %%
-{String}              { printf("%d: String: %s\n", yylineno, yytext); }
-{ReservedWord}        { printf("%d: ReservedWord: %s\n", yylineno, yytext); }
-{Operator}            { printf("%d: Operator: %s\n", yylineno, yytext); }
+{String}              {}
 
-{OpenParenthesis}     { printf("%d: OpenParenthesis %s\n", yylineno, yytext); }
-{CloseParenthesis}    { printf("%d: CloseParenthesis %s\n", yylineno, yytext); }  
-{OpenBrake}           { printf("%d: OpenBrake %s\n", yylineno, yytext); }
-{CloseBrake}          { printf("%d: CloseBrake %s\n", yylineno, yytext); }
-{OpenBrace}           { printf("%d: OpenBrace %s\n", yylineno, yytext); }
-{CloseBrace}          { printf("%d: CloseBrace %s\n", yylineno, yytext); }
+"class"               return CLASS;
+"public"              return PUBLIC;
+"static"              return STATIC;
+"int"|"void"|"boolean" return TYPE;
+"extends"             return EXTENDS;
+"if"                  return IF;
+"else"                return ELSE;
+"while"               return WHILE;
+"this"                return THIS;
+"return"              return RETURN;
+"System.out.println"  return PRINT;
+"new"                 return NEW;
+"String"              return STRING;
+"true"                return TRUE;
+"false"               return FALSE;
+"&&"                  return AND;
+"||"                  return OR;
+"length"              return LENGTH;
+"main"                return MAIN;
 
-{BooleanConstant}     { printf("%d: BooleanConstant: %s\n", yylineno, yytext); }
+{Operator}            return *yytext;
+{OpenParenthesis}     return *yytext;
+{CloseParenthesis}    return *yytext;
+{OpenBrake}           return *yytext;
+{CloseBrake}          return *yytext;
+{OpenBrace}           return *yytext;
+{CloseBrace}          return *yytext;
+{InstructionEnd}      return *yytext;
+
 {Number}              { errno = 0;
                         strtol(yytext, NULL, 10);
                         if(errno == ERANGE)
                           fprintf(stderr,"ERROR: (Line %d) Numeric constant max length: %s\n", yylineno, yytext);
-                        else
-                          printf("%d: Number: %s\n", yylineno, yytext); }
+			               else {
+			                  //yylval = *yytext;
+			                  return NUM;
+			               }
+                      }
 
 {ID}                  { if(yyleng > ID_MAX_LEN)
                           fprintf(stderr,"ERROR: (Line %d) ID max length: %s\n", yylineno, yytext);
                         else {
-			  printf("%d: ID: %s\n", yylineno, yytext);
+               			  string id(yytext);
+                   			  // Si no esta el id en la tabla inserta toda la informacion nueva
+			                     // si ya existe el id solo añade el nuevo numero de linea
+			                 if(table.find(id) == table.end())
+			                     table.insert( {id, TableInfo{INT, 0, vector<int>({yylineno})}} );
+			                 else
+			                     table[id].lines.push_back(yylineno);
+               			  //yylval = *yytext;
+			                 return ID;
+			               }
+		               }
 
-			  string id(yytext);
 
-			  // Si no esta el id en la tabla inserta toda la informacion nueva
-			  // si ya existe el id solo añade el nuevo numero de linea
-			  if(table.find(id) == table.end())
-			    table.insert( {id, TableInfo{INT, 0, vector<int>({yylineno})}} );
-			  else
-			    table[id].lines.push_back(yylineno);
-
-			}
-		      }
-
-{InstructionEnd}      { printf("%d: %s\n", yylineno, yytext); }
 
 {Blank}               { ; }
-{Comment}             { printf("%d: %s\n", yylineno, yytext); }
-{CommentError}		  { fprintf(stderr,"ERROR: (Line %d) Comment Error: %s\n", yylineno, yytext); }
+{Comment}             {}
+{CommentError}	      { fprintf(stderr,"ERROR: (Line %d) Comment Error: %s\n", yylineno, yytext); }
 
 {InvalidID}           { fprintf(stderr,"ERROR: (Line %d) Invalid ID: %s\n", yylineno, yytext); }
 {InvalidNumber}       { fprintf(stderr,"ERROR: (Line %d) Invalid Number %s\n",yylineno,yytext); }
@@ -87,11 +107,6 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 
 %%
 
-int main()
-{
-  yylex();
-
-  cout << table;
-  
-  return 0;
-}
+//int yywrap(void) {
+//  return 1;
+//}
