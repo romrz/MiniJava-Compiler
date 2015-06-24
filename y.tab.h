@@ -65,7 +65,8 @@ extern int yydebug;
     FALSE = 275,
     AND = 276,
     OR = 277,
-    LENGTH = 278
+    LENGTH = 278,
+    MAIN = 279
   };
 #endif
 /* Tokens.  */
@@ -90,6 +91,7 @@ extern int yydebug;
 #define AND 276
 #define OR 277
 #define LENGTH 278
+#define MAIN 279
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

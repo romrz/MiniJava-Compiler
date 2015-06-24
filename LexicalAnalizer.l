@@ -9,6 +9,8 @@ void yyerror(char *s);
 #define ID_MAX_LEN 16
 
 SymbolTable table;
+long NUM_VAL;
+
 %}
 
 ID [a-zA-Z_][a-zA-Z0-9_]*
@@ -73,10 +75,10 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
                         strtol(yytext, NULL, 10);
                         if(errno == ERANGE)
                           fprintf(stderr,"ERROR: (Line %d) Numeric constant max length: %s\n", yylineno, yytext);
-			               else {
-			                  //yylval = *yytext;
-			                  return NUM;
-			               }
+			else {
+                          yylval = strtol(yytext, NULL, 10);
+			  return NUM;
+			}
                       }
 
 {ID}                  { if(yyleng > ID_MAX_LEN)
@@ -89,7 +91,7 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 			                     table.insert( {id, TableInfo{INT, 0, vector<int>({yylineno})}} );
 			                 else
 			                     table[id].lines.push_back(yylineno);
-               			  //yylval = *yytext;
+               			  //yylval = yytext;
 			                 return ID;
 			               }
 		               }

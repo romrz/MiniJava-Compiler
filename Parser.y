@@ -68,11 +68,11 @@ Statements:
     ;
 
 Statement:
-     IF '(' Expression ')' Statements
-    |IF '(' Expression ')' Statements ELSE Statements
+    IF '(' Expression ')' Statements 
+    | IF '(' Expression ')' Statements ELSE Statements 
     | WHILE '(' Expression ')' Statements
     | PRINT '(' Expression ')' ';'
-    | ID '=' Expression ';'
+    | ID '=' Expression ';' { printf("%d\n", $2); }
     | ID '[' Expression ']' '=' Expression ';'
     | RETURN Expression ';'
     | RETURN ';'
