@@ -5,32 +5,23 @@
 
 using namespace std;
 
-enum Type { INT, BOOL };
+#ifndef SYMBOL_TABLE_H
+#define SYMBOL_TABLE_H
+
+#define INT 1
+#define BOOL 2
+#define VOID 3
+#define ARRAYINT 4
+#define ARRAYBOOL 5
 
 struct TableInfo {
-  Type type;
+  int type;
   int value;
   vector<int> lines;
 };
 
 typedef unordered_map<string, TableInfo> SymbolTable;
 
-ostream& operator<<(ostream &os, SymbolTable& table)
-{
-  // Obtiene la funcion hash
-  SymbolTable::hasher fn = table.hash_function();
-  
-  os << endl << "Symbol Table" << endl << endl;
-  for(auto& i : table)
-  {
-    os << i.first << ": "<< "{ " << i.second.type << ", " << i.second.value << ", ";
+ostream& operator<<(ostream &, SymbolTable&);
 
-    for(int line : i.second.lines)
-      os << line << " ";
-
-    os << "}";
-
-    // Imprime el valor de la funcion hash
-    os << " " << fn(i.first) << endl;    
-  }
-}
+#endif

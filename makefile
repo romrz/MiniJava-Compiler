@@ -11,4 +11,4 @@ lex:
 	flex LexicalAnalizer.l
 
 build:
-	$(CC) $(CFLAGS) lex.yy.c y.tab.c
+	$(CC) $(CFLAGS) SymbolTable.cpp lex.yy.c y.tab.c

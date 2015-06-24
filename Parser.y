@@ -1,10 +1,17 @@
 %{
   #include <cstdio>
-  
+  #include <string>
+  #include <iostream>
+  #include "SymbolTable.h"
   void yyerror(char *);
   int yylex(void);
-  
+  SymbolTable table;
 %}
+
+%union{
+   long num;
+   char cad[100];
+};
 
 %token NUM ID TYPE OP CLASS PUBLIC STATIC EXTENDS IF ELSE WHILE THIS RETURN PRINT NEW STRING TRUE FALSE AND OR LENGTH MAIN
 
@@ -34,11 +41,11 @@ VarDeclarations:
     ;
 
 VarDeclaration:
-     TYPE ID ';'
-    |TYPE ID '[' ']' ';'
-    |TYPE ID '[' NUM ']' ';'
-    |TYPE '[' ']' ID  ';'
-    |TYPE '[' NUM ']' ID  ';'
+     TYPE ID ';' {string id($2.cad); if(table.find(id)!=table.end()){table[id].type=$1.num;} }
+    |TYPE ID '[' ']' ';' {string id($2.cad); if(table.find(id)!=table.end()){table[id].type=$1.num+3;} }
+    |TYPE ID '[' NUM ']' ';' {string id($2.cad); if(table.find(id)!=table.end()){table[id].type=$1.num+3;table[id].value=$4.num;} }
+    |TYPE '[' ']' ID  ';' {string id($4.cad); if(table.find(id)!=table.end()){table[id].type=$1.num+3;} }
+    |TYPE '[' NUM ']' ID  ';' {string id($5.cad); if(table.find(id)!=table.end()){table[id].type=$1.num+3;table[id].value=$3.num;} }
     ;
 
 
@@ -48,8 +55,8 @@ MethodDeclarations:
     ;
 
 MethodDeclaration:
-     PUBLIC TYPE ID '(' ParamList ')' '{' Statements '}'
-    |PUBLIC TYPE ID '(' ')' '{' Statements '}'
+     PUBLIC TYPE ID '(' ParamList ')' '{' Statements '}' {string id($3.cad); if(table.find(id)!=table.end()){table[id].type=$2.num;} }
+    |PUBLIC TYPE ID '(' ')' '{' Statements '}' {string id($3.cad); if(table.find(id)!=table.end()){table[id].type=$2.num;} }
     ;
 
 ParamList:
@@ -68,11 +75,14 @@ Statements:
     ;
 
 Statement:
-    IF '(' Expression ')' Statements 
-    | IF '(' Expression ')' Statements ELSE Statements 
+    IF '(' Expression ')' Statements
+    | IF '(' Expression ')' Statements ELSE Statements
     | WHILE '(' Expression ')' Statements
     | PRINT '(' Expression ')' ';'
-    | ID '=' Expression ';' { printf("%d\n", $2); }
+    | ID '=' NUM ';' {string id($1.cad); if(table.find(id)!=table.end()){table[id].value=$3.num;} }
+    | ID '=' TRUE ';' {string id($1.cad); if(table.find(id)!=table.end()){table[id].value=1;} }
+    | ID '=' FALSE ';' {string id($1.cad); if(table.find(id)!=table.end()){table[id].value=0;} } 
+    | ID '=' Expression ';'
     | ID '[' Expression ']' '=' Expression ';'
     | RETURN Expression ';'
     | RETURN ';'
@@ -116,6 +126,7 @@ void yyerror(char *error) {
 
 int main(void) {
   yyparse();
+  std::cout<<table;
   return 0;
 }
     

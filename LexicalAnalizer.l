@@ -1,14 +1,15 @@
 %{
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include "SymbolTable.h"
 
 void yyerror(char *s);
 #include "y.tab.h"
-#include "SymbolTable.h"
 
 #define ID_MAX_LEN 16
 
-SymbolTable table;
+extern SymbolTable table;
 long NUM_VAL;
 
 %}
@@ -45,7 +46,9 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 "class"               return CLASS;
 "public"              return PUBLIC;
 "static"              return STATIC;
-"int"|"void"|"boolean" return TYPE;
+"int"                 {yylval.num=INT; return TYPE;}
+"void"                {yylval.num=VOID; return TYPE;}
+"boolean"             {yylval.num=BOOL; return TYPE;}
 "extends"             return EXTENDS;
 "if"                  return IF;
 "else"                return ELSE;
@@ -76,7 +79,7 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
                         if(errno == ERANGE)
                           fprintf(stderr,"ERROR: (Line %d) Numeric constant max length: %s\n", yylineno, yytext);
 			else {
-                          yylval = strtol(yytext, NULL, 10);
+                          yylval.num = strtol(yytext, NULL, 10);
 			  return NUM;
 			}
                       }
@@ -91,7 +94,7 @@ InvalidNumber {Number}([a-zA-Z_"."]{Number}?)+
 			                     table.insert( {id, TableInfo{INT, 0, vector<int>({yylineno})}} );
 			                 else
 			                     table[id].lines.push_back(yylineno);
-               			  //yylval = yytext;
+               			  strcpy(yylval.cad,yytext);
 			                 return ID;
 			               }
 		               }
